@@ -1,20 +1,6 @@
 import 'phaser';
- 
-class PlayGame extends Phaser.Scene {
-    image: Phaser.GameObjects.Image;
-    constructor() {
-        super("Merge3");
-    }
-    preload(): void {
-        this.load.image('logo', 'assets/logo.png');    
-    }
-    create(): void {
-        this.image = this.add.image(400, 300, 'logo');
-    }
-    update(): void {
-        this.image.rotation += 0.01;   
-    }
-}
+import { GameScene } from './scripts/scenes/game';
+import { StartScene } from './scripts/scenes/start';
  
 let configObject: Phaser.Types.Core.GameConfig = {
     scale: {
@@ -24,7 +10,7 @@ let configObject: Phaser.Types.Core.GameConfig = {
         width: 800,
         height: 600
     },
-    scene: PlayGame
+    scene: [StartScene, GameScene]
 };
  
 new Phaser.Game(configObject);

@@ -13,6 +13,7 @@
     /* Type Checking */
     "strict": true,                                      /* Enable all strict type-checking options. */
     "strictPropertyInitialization": false,               /* Enable strict checking of property initialization in classes. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "downlevelIteration": true
   }
 }
