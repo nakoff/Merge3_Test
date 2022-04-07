@@ -1,8 +1,11 @@
 import { GameFieldModel } from '../models/game-field';
+import { CellObject } from '../models/objects/cell';
+import { Event } from '../core/event';
 import { Vec2 } from '../core/types';
 
 export interface IGameView {
     createCell(pos: Vec2): void;
+    clickEvent: Event<number, number>;
 }
 
 
@@ -15,6 +18,9 @@ export class GamePresenter {
 
     public constructor(view: IGameView) {
         this._view = view;
+        view.clickEvent.on((x, y) => {
+            console.log(this.getCellByPos(x, y));
+        })
     }
 
     public create(fieldSize: Vec2, cellSize: Vec2): void {
@@ -43,4 +49,18 @@ export class GamePresenter {
     }
 
     public onUpdate() { }
+
+    private getCellByPos(x: number, y: number): CellObject | undefined {
+        const field = this._fieldModel.getField();
+        const halfSize = {x: this._cellSize.x/2, y: this._cellSize.y/2};
+
+        for (const [c, map] of field) {
+            for (const [r, cell] of map) {
+                if (x >= cell.x - halfSize.x && x < cell.x + halfSize.x &&
+                    y >= cell.y - halfSize.y && y < cell.y + halfSize.y) {
+                        return cell;
+                    }
+            }
+        }
+    }
 }
