@@ -1,11 +1,7 @@
 import { IDataObject, ObjectType } from "../../core/data-object";
 
-export enum CellType {
-    EMPTY, ONE, TWO, THREE, FOR, FIVE,
-}
-
 export class CellObject implements IDataObject {
-    type = ObjectType.CELL;
+    readonly type = ObjectType.CELL;
     id: number;
 
     public readonly col: integer;
@@ -13,7 +9,7 @@ export class CellObject implements IDataObject {
     public readonly x: number;
     public readonly y: number;
 
-    public cellType: CellType = CellType.EMPTY;
+    public cellType: integer;
 
     public constructor(col: integer, row: integer, x: number, y: number) {
         this.col = col;

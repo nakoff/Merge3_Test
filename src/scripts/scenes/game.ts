@@ -14,6 +14,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     create(): void {
+        //Min cells in chain;
+        const minOverlap = 3;
+
         //Field Size
         const cols = 9;
         const rows = 9;
@@ -22,7 +25,11 @@ export class GameScene extends Phaser.Scene {
         const cellWidth = 39.3;
         const cellHeight = 44.3;
 
-        this._gamePres.create({x: cols, y: rows}, {x: cellWidth, y: cellHeight});
+        this._gamePres.create(
+            { x: cols, y: rows }, 
+            { x: cellWidth, y: cellHeight },
+            minOverlap
+        );
     }
 
     update(): void {
