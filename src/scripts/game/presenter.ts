@@ -34,24 +34,21 @@ export class GamePresenter {
         }
 
         //draw cells
-        const field = this._fieldModel.getField();
-        let pos: Vec2 = {x: 0, y: 0};
+        const cells = this._fieldModel.getCells();
         const elSize = Object.keys(ElementType).length / 2;
 
-        for (const [c, map] of field) {
-            for (const [r, cell] of map) {
-                const type = Math.floor(Math.random() * elSize);
-                pos.x = cell.x,
-                pos.y = cell.y;
-                cell.cellType = type;
-                this._view.createCell(cell.id, pos, type);
-            }
+        for (const [id, cell] of cells) {
+            const type = Math.floor(Math.random() * elSize);
+            cell.cellType = type;
+            this._view.createCell(cell.id, {x: cell.x, y: cell.y}, type);
         }
 
         this._view.clickEvent.on((x, y) => this.onClick(x, y));
     }
 
-    public onUpdate() { }
+    public onUpdate() {
+        this._view.update();
+    }
 
     private onClick(x: number, y: number): void {
         const cell = this.getCellByPos(x, y);
@@ -62,39 +59,79 @@ export class GamePresenter {
 
         if (cellsChain.size < this._minOverlap) return;
 
+        //Delete
+        const colCells = new Map<integer, CellObject[]>();
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
-            this._view.deleteCell(id);
+            this._view.changeCellType(id, c.cellType);
+
+            if (!colCells.has(c.col))
+                colCells.set(c.col, new Array<CellObject>());
+            
+            colCells.get(c.col)?.push(c);
         }
+
+        //Falling Cells
+        this.spawCells(colCells);
+    }
+
+    private spawCells(cellsEmpty: Map<integer, CellObject[]>): void {
+        const newEmpty = new Map<integer, CellObject[]>();
+
+        for (const [col, cells] of cellsEmpty) {
+            const colSize = cells.length;
+            for (const cell of cells) {
+                if (cell.cellType != -1) continue;
+
+                const tCell = this.getCellByDir(cell, Direction.UP, colSize);
+                if (tCell) {
+                    cell.cellType = tCell.cellType;
+                    tCell.cellType = -1;
+                    if (!newEmpty.has(tCell.col))
+                        newEmpty.set(tCell.col, new Array<CellObject>());
+                    newEmpty.get(tCell.col)?.push(tCell);
+                    this._view.swapCells(tCell.id, cell.id);
+                }
+            }
+        }
+
+        if (newEmpty.size > 0)
+            this.spawCells(newEmpty);
     }
 
     private getCellByPos(x: number, y: number): CellObject | null {
-        const field = this._fieldModel.getField();
+        const cells = this._fieldModel.getCells();
         const halfSize = {x: this._cellSize.x/2, y: this._cellSize.y/2};
 
-        for (const [c, map] of field) {
-            for (const [r, cell] of map) {
-                if (x >= cell.x - halfSize.x && x < cell.x + halfSize.x 
-                && y >= cell.y - halfSize.y && y < cell.y + halfSize.y) {
-                    return cell;
-                }
+        for (const [id, cell] of cells) {
+            if (x >= cell.x - halfSize.x && x < cell.x + halfSize.x 
+            && y >= cell.y - halfSize.y && y < cell.y + halfSize.y) {
+                return cell;
             }
         }
         return null;
     }
 
-    private getCellByDir(curCell: CellObject, dir: Direction): CellObject | undefined {
-        var col: integer = curCell.col;
-        var row: integer = curCell.row;
+    private getCellByDir(curCell: CellObject, dir: Direction, dist: integer = 1): CellObject | undefined {
+        let curId = curCell.id;
+        let tId = -1;
 
         switch (dir) {
-            case Direction.LEFT: col--; break;
-            case Direction.RIGHT: col++; break;
-            case Direction.UP: row--; break;
-            case Direction.DOWN: row++; break;
+            case Direction.LEFT: 
+                if ((curId - this._cols * curCell.row) - dist >= 0) tId = curId - dist;
+                break;
+            case Direction.RIGHT:
+                if ((curId - this._cols * curCell.row) + dist < this._cols) tId = curId + dist;
+                break;
+            case Direction.UP: 
+                tId = curId - (this._cols * dist); 
+                break;
+            case Direction.DOWN: 
+                tId = curId + (this._cols * dist); 
+                break;
         }
 
-        return this._fieldModel.getCell(col, row);
+        return this._fieldModel.getCell(tId);
     }
 
     private collectChain(cell: CellObject, chain: Map<integer, CellObject>): void{
