@@ -40,6 +40,15 @@ export class GameFieldModel {
         return this._cacheCells;
     }
 
+    public getCellsArray(): CellObject[] {
+        const arr = new Array<CellObject>();
+        const objs = this._dataManager.getObjects(ObjectType.CELL);
+        for (const obj of objs) {
+            arr.push(<CellObject>obj);
+        }
+        return arr;
+    }
+
     public getCell(id: integer): CellObject | undefined {
         if (!this._cacheObjs)
             this.getCells();

@@ -56,11 +56,12 @@ export class GamePresenter {
         const cell = this.getCellByPos(x, y);
         if (!cell || cell.cellType < 0) return;
 
+        //Get Chain by Cell
         const cellsChain = new Map<integer, CellObject>();
         this.collectChain(cell, cellsChain);
         if (cellsChain.size < this._minOverlap) return;
 
-        //Delete
+        //Delete Elements
         const colCells = new Map<integer, CellObject[]>();
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
@@ -74,6 +75,11 @@ export class GamePresenter {
 
         //Falling Cells
         this.spawCells(colCells);
+
+        //Calculate Left Steps
+        const cells = this._fieldModel.getCellsArray();
+        const leftSteps = this.getLeftSteps(cells);
+        console.log("LEFT STEPS: ", leftSteps);
     }
 
     private spawCells(cellsEmpty: Map<integer, CellObject[]>): void {
@@ -154,5 +160,23 @@ export class GamePresenter {
                 this.collectChain(targetCell, chain);
             }
         }
+    }
+
+    private getLeftSteps(cells: CellObject[]): integer{
+        const cell = cells.pop();
+        let count = 0;
+        if (!cell) return count;
+
+        const chain = new Map<integer, CellObject>();
+        this.collectChain(cell, chain);
+        if (chain.size >= this._minOverlap)
+            count++
+
+        for (const [i, c] of chain) {
+            const idx = cells.indexOf(c, 0);
+            if (idx > -1) cells.splice(idx, 1);
+        }
+
+        return count + this.getLeftSteps(cells);
     }
 }
