@@ -8,7 +8,7 @@ export enum ElementType {
 export interface IGameView {
     update(): void;
     createCell(id: integer, pos: Vec2, type: integer): void;
-    changeCellType(id: integer, type: integer): void;
+    changeCell(id: integer, type: integer, offsetY?: number): void;
     swapCells(id1: integer, id2: integer): void;
     clickEvent: Event<number, number>;
 }

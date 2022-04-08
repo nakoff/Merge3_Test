@@ -15,6 +15,11 @@ export class GamePresenter {
     private _fieldModel: GameFieldModel;
     private _minOverlap: integer;
 
+    private get randType(): integer {
+        const elSize = Object.keys(ElementType).length / 2;
+        return Math.floor(Math.random() * elSize);
+    }
+
     public constructor(view: IGameView) {
         this._view = view;
     }
@@ -35,12 +40,9 @@ export class GamePresenter {
 
         //draw cells
         const cells = this._fieldModel.getCells();
-        const elSize = Object.keys(ElementType).length / 2;
-
         for (const [id, cell] of cells) {
-            const type = Math.floor(Math.random() * elSize);
-            cell.cellType = type;
-            this._view.createCell(cell.id, {x: cell.x, y: cell.y}, type);
+            cell.cellType = this.randType;
+            this._view.createCell(cell.id, {x: cell.x, y: cell.y}, cell.cellType);
         }
 
         this._view.clickEvent.on((x, y) => this.onClick(x, y));
@@ -52,18 +54,17 @@ export class GamePresenter {
 
     private onClick(x: number, y: number): void {
         const cell = this.getCellByPos(x, y);
-        if (!cell) return;
+        if (!cell || cell.cellType < 0) return;
 
         const cellsChain = new Map<integer, CellObject>();
         this.collectChain(cell, cellsChain);
-
         if (cellsChain.size < this._minOverlap) return;
 
         //Delete
         const colCells = new Map<integer, CellObject[]>();
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
-            this._view.changeCellType(id, c.cellType);
+            this._view.changeCell(id, c.cellType);
 
             if (!colCells.has(c.col))
                 colCells.set(c.col, new Array<CellObject>());
@@ -85,12 +86,18 @@ export class GamePresenter {
 
                 const tCell = this.getCellByDir(cell, Direction.UP, colSize);
                 if (tCell) {
+                    //Swap Elements
                     cell.cellType = tCell.cellType;
                     tCell.cellType = -1;
                     if (!newEmpty.has(tCell.col))
                         newEmpty.set(tCell.col, new Array<CellObject>());
                     newEmpty.get(tCell.col)?.push(tCell);
                     this._view.swapCells(tCell.id, cell.id);
+                } else {
+                    //Create new Element
+                    cell.cellType = this.randType;
+                    const offsetY = this._cellSize.y * colSize;
+                    this._view.changeCell(cell.id, cell.cellType, offsetY);
                 }
             }
         }

@@ -48,6 +48,11 @@ export class GameView implements IGameView {
         })
     }
 
+    private createElement(cell: Cell, type: integer, x: number, y: number): void {
+        const element = this._resManager.createSprite(Resource.ELEMENTS, x, y, type);
+        cell.element = element;
+    }
+
     update(): void {
         for (const [id, cell] of this._dirtyCells) {
             const el = cell.element;
@@ -64,20 +69,22 @@ export class GameView implements IGameView {
     createCell(id: integer, pos: Vec2, type: integer): void {
         var cell = new Cell(id, type, pos);
         this._cells.set(id, cell);
-
-        const element = this._resManager.createSprite(Resource.ELEMENTS, pos.x, pos.y, type);
-        cell.element = element;
+        this.createElement(cell, type, pos.x, pos.y);
     }
 
-    changeCellType(id: integer, type: integer): void {
+    changeCell(id: integer, type: integer, offsetY?: number): void {
         const cell = this._cells.get(id);
-        if (!cell || !cell.element) return;
+        if (!cell) return;
 
-        cell.element.destroy();
-        cell.element = undefined;
+        if (cell.element) {
+            cell.element.destroy();
+            cell.element = undefined;
+        }
 
         if (type >= 0) {
-            this.createCell(id, {x: cell.x, y: cell.y}, type);
+            const y = offsetY ? offsetY : 0;
+            this.createElement(cell, type, cell.x, cell.y - y);
+            this._dirtyCells.set(id, cell);
         }
     }
 
