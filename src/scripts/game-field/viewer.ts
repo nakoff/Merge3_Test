@@ -31,7 +31,7 @@ export class GameView implements IGameView {
         this.init();
     }
 
-    clickEvent = new Event<number, number>();
+    public clickEvent = new Event<Vec2>();
 
 
     private init(): void {
@@ -44,7 +44,7 @@ export class GameView implements IGameView {
         this._scene.input.on("pointerdown", () => {
             const x = this._scene.input.mousePointer.x;
             const y = this._scene.input.mousePointer.y;
-            this.clickEvent.trigger(x,y);
+            this.clickEvent.trigger({x:x, y:y});
         })
     }
 

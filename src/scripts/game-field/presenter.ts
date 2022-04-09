@@ -49,7 +49,7 @@ export class GamePresenter {
             this._view.createCell(cell.id, {x: cell.x, y: cell.y}, cell.cellType);
         }
 
-        this._view.clickEvent.on((x, y) => this.onClick(x, y));
+        this._view.clickEvent.on((pos: Vec2) => this.onClick(pos.x, pos.y));
     }
 
     public onUpdate() {

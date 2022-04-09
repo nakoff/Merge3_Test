@@ -1,6 +1,6 @@
 
 export enum ObjectType {
-    TEST, CELL,
+    TEST, CELL, GAME_DATA,
 }
 
 export interface IDataObject {
