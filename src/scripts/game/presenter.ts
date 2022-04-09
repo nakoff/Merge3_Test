@@ -16,8 +16,12 @@ export class GamePresenter {
     private _minOverlap: integer;
 
     private get randType(): integer {
-        const elSize = Object.keys(ElementType).length / 2;
-        return Math.floor(Math.random() * elSize);
+        // const elSize = Object.keys(ElementType).length / 2;
+        const types = [
+            ElementType.ONE, ElementType.TWO, ElementType.THREE, 
+            ElementType.FOR, ElementType.FIVE
+        ];
+        return Math.floor(Math.random() * types.length);
     }
 
     public constructor(view: IGameView) {
@@ -74,31 +78,52 @@ export class GamePresenter {
         }
 
         //Falling Cells
-        this.spawCells(colCells);
+        this.fallinCells(colCells);
 
         //Calculate Left Steps
         const cells = this._fieldModel.getCellsArray();
         const leftSteps = this.getLeftSteps(cells);
-        console.log("LEFT STEPS: ", leftSteps);
+        if (leftSteps === 0) {
+            this.mixField(this._fieldModel.getCellsArray());
+        }
     }
 
-    private spawCells(cellsEmpty: Map<integer, CellObject[]>): void {
+    private mixField(cells: CellObject[]): void {
+        if (cells.length < 2) return;
+
+        const tId1 = Math.floor(Math.random() * cells.length);
+        let cell1 = cells[tId1];
+        cells.splice(tId1, 1);
+
+        const tId2 = Math.floor(Math.random() * cells.length);
+        const cell2 = cells[tId2];
+        cells.splice(tId2, 1);
+
+        this.swapCells(cell1, cell2);
+        this.mixField(cells);
+    }
+
+
+    private swapCells(cell1: CellObject, cell2: CellObject): void {
+        const type1 = cell1.cellType;
+        cell1.cellType = cell2.cellType;
+        cell2.cellType = type1;
+        this._view.swapCells(cell1.id, cell2.id);
+    }
+
+    private fallinCells(cellsEmpty: Map<integer, CellObject[]>): void {
         const newEmpty = new Map<integer, CellObject[]>();
 
         for (const [col, cells] of cellsEmpty) {
             const colSize = cells.length;
             for (const cell of cells) {
-                if (cell.cellType != -1) continue;
-
                 const tCell = this.getCellByDir(cell, Direction.UP, colSize);
                 if (tCell) {
                     //Swap Elements
-                    cell.cellType = tCell.cellType;
-                    tCell.cellType = -1;
+                    this.swapCells(cell, tCell);
                     if (!newEmpty.has(tCell.col))
                         newEmpty.set(tCell.col, new Array<CellObject>());
                     newEmpty.get(tCell.col)?.push(tCell);
-                    this._view.swapCells(tCell.id, cell.id);
                 } else {
                     //Create new Element
                     cell.cellType = this.randType;
@@ -109,7 +134,7 @@ export class GamePresenter {
         }
 
         if (newEmpty.size > 0)
-            this.spawCells(newEmpty);
+            this.fallinCells(newEmpty);
     }
 
     private getCellByPos(x: number, y: number): CellObject | null {

@@ -58,11 +58,19 @@ export class GameView implements IGameView {
             const el = cell.element;
             if (!el) continue;
 
-            el.y += this._fallSpeed;
-            if (el.y >= cell.y) {
-                el.y = cell.y;
+            const dirX = Math.sign(cell.x - el.x);
+            const dirY = Math.sign(cell.y - el.y);
+            const distX = Math.abs(cell.x - el.x);
+            const distY = Math.abs(cell.y - el.y);
+
+            if (distX > 2) el.x += this._fallSpeed * dirX;
+            else el.x = cell.x;
+
+            if (distY > 2) el.y += this._fallSpeed * dirY;
+            else el.y = cell.y;
+            
+            if (distX <= 2 && distY <= 2)
                 this._dirtyCells.delete(id);
-            }
         }
     }
 

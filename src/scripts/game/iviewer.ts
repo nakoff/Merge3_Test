@@ -2,7 +2,7 @@ import { Vec2 } from "../core/types";
 import { Event } from '../core/event';
 
 export enum ElementType {
-    ONE, TWO, THREE, FOR, FIVE, 
+    ONE, TWO, THREE, FOR, FIVE, BONUS1, BONUS2,
 }
 
 export interface IGameView {
