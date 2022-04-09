@@ -24,7 +24,7 @@ export class GameView implements IGameView {
     private _resManager: ResourceManager;
     private readonly _cells = new Map<integer, Cell>();
     private readonly _dirtyCells = new Map<integer, Cell>();
-    private _fallSpeed = 3;
+    private _fallSpeed = 5;
 
     public constructor(scene: Phaser.Scene) {
         this._scene = scene;
@@ -63,13 +63,13 @@ export class GameView implements IGameView {
             const distX = Math.abs(cell.x - el.x);
             const distY = Math.abs(cell.y - el.y);
 
-            if (distX > 2) el.x += this._fallSpeed * dirX;
+            if (distX > this._fallSpeed) el.x += this._fallSpeed * dirX;
             else el.x = cell.x;
 
-            if (distY > 2) el.y += this._fallSpeed * dirY;
+            if (distY > this._fallSpeed) el.y += this._fallSpeed * dirY;
             else el.y = cell.y;
             
-            if (distX <= 2 && distY <= 2)
+            if (distX <= this._fallSpeed && distY <= this._fallSpeed)
                 this._dirtyCells.delete(id);
         }
     }

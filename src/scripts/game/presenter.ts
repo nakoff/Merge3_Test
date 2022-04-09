@@ -66,19 +66,13 @@ export class GamePresenter {
         if (cellsChain.size < this._minOverlap) return;
 
         //Delete Elements
-        const colCells = new Map<integer, CellObject[]>();
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
             this._view.changeCell(id, c.cellType);
-
-            if (!colCells.has(c.col))
-                colCells.set(c.col, new Array<CellObject>());
-            
-            colCells.get(c.col)?.push(c);
         }
 
         //Falling Cells
-        this.fallinCells(colCells);
+        this.fallinCells(cellsChain);
 
         //Calculate Left Steps
         const cells = this._fieldModel.getCellsArray();
@@ -103,7 +97,6 @@ export class GamePresenter {
         this.mixField(cells);
     }
 
-
     private swapCells(cell1: CellObject, cell2: CellObject): void {
         const type1 = cell1.cellType;
         cell1.cellType = cell2.cellType;
@@ -111,30 +104,24 @@ export class GamePresenter {
         this._view.swapCells(cell1.id, cell2.id);
     }
 
-    private fallinCells(cellsEmpty: Map<integer, CellObject[]>): void {
-        const newEmpty = new Map<integer, CellObject[]>();
+    private fallinCells(emptyCells: Map<integer, CellObject>): void {
+        if (emptyCells.size == 0) return;
 
-        for (const [col, cells] of cellsEmpty) {
-            const colSize = cells.length;
-            for (const cell of cells) {
-                const tCell = this.getCellByDir(cell, Direction.UP, colSize);
-                if (tCell) {
-                    //Swap Elements
-                    this.swapCells(cell, tCell);
-                    if (!newEmpty.has(tCell.col))
-                        newEmpty.set(tCell.col, new Array<CellObject>());
-                    newEmpty.get(tCell.col)?.push(tCell);
-                } else {
-                    //Create new Element
-                    cell.cellType = this.randType;
-                    const offsetY = this._cellSize.y * colSize;
-                    this._view.changeCell(cell.id, cell.cellType, offsetY);
+        for (const [id, cell] of emptyCells) {
+            const upCell = this.getCellByDir(cell, Direction.UP);
+            if (upCell) {
+                emptyCells.set(upCell.id, upCell);
+                if (upCell.cellType >= 0) {
+                    this.swapCells(cell, upCell);
+                    emptyCells.delete(id);
                 }
+            } else {
+                emptyCells.delete(id);
+                cell.cellType = this.randType;
+                this._view.changeCell(id, cell.cellType, this._cellSize.y);
             }
         }
-
-        if (newEmpty.size > 0)
-            this.fallinCells(newEmpty);
+        this.fallinCells(emptyCells);
     }
 
     private getCellByPos(x: number, y: number): CellObject | null {
