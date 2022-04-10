@@ -29,6 +29,8 @@ export class GameUI {
                 break;
             case TypeEvent.SCORE: 
                 this._view.score = this._dataModel.score;
+                const normal = this._dataModel.score / GameConsts.GOAL_SCORE;
+                this._view.progress = normal;
                 break;
             case TypeEvent.MIX: 
                 this._view.leftMix = GameConsts.MAX_MIXES - this._dataModel.mixCount;
