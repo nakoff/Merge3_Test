@@ -1,17 +1,35 @@
 import { DataManager } from '../core/data-manager';
 import { GameDataObject } from './objects/data';
 import { Event } from '../core/event';
+import { ObjectType } from '../core/data-object';
 
-export enum TypeEvent { ANY, }
+export enum TypeEvent { STEP, SCORE, MIX }
 
 export class GameDataModel {
     private _dataManager: DataManager;
     private _do: GameDataObject;
 
-    public updateEvent = new Event<TypeEvent>();
+    private updateEvent = new Event<TypeEvent>();
 
     public constructor() {
         this._dataManager = new DataManager();
+        const obj = this._dataManager.getObjects(ObjectType.GAME_DATA).pop();
+        if (obj) {
+            this._do = <GameDataObject> obj;
+        }
+    }
+
+    public subscribe(listener: (arg0: TypeEvent)=> void): void {
+        this._do.updateEvent.on((id) => this.onDataChanged(id));
+        this.updateEvent.on(listener)
+    }
+
+    public unSubscribe(): void {
+        this._do.updateEvent.off((id) => this.onDataChanged(id));
+    }
+
+    private onDataChanged(id: TypeEvent): void {
+        this.updateEvent.trigger(id);
     }
 
     public createData(): void {
@@ -25,7 +43,7 @@ export class GameDataModel {
 
     public set step(val: integer){
         this._do.step = val;
-        this.updateEvent.trigger(TypeEvent.ANY);
+        this._do.updateEvent.trigger(TypeEvent.STEP);
     }
 
     public get score(): integer {
@@ -34,7 +52,7 @@ export class GameDataModel {
 
     public set score(val: integer) {
         this._do.score = val;
-        this.updateEvent.trigger(TypeEvent.ANY);
+        this._do.updateEvent.trigger(TypeEvent.SCORE);
     }
 
     public get mixCount(): integer {
@@ -43,6 +61,6 @@ export class GameDataModel {
 
     public set mixCount(val: integer) {
         this._do.mixCount = val;
-        this.updateEvent.trigger(TypeEvent.ANY);
+        this._do.updateEvent.trigger(TypeEvent.MIX);
     }
 }

@@ -1,6 +1,8 @@
 import { IDataObject, ObjectType } from "../../core/data-object";
+import { Event } from "../../core/event";
 
 export class GameDataObject implements IDataObject {
+    public updateEvent = new Event<integer>();
     readonly type = ObjectType.GAME_DATA;
     id: number;
 

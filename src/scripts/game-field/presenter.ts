@@ -2,6 +2,9 @@ import { GameFieldModel } from '../models/game-field';
 import { CellObject } from '../models/objects/cell';
 import { Vec2 } from '../core/types';
 import { IGameView, ElementType } from './iviewer';
+import { GameDataModel } from '../models/game-data';
+import { Scene, SceneManager } from '../core/scene-manager';
+import { GameConsts } from '../game-consts';
 
 enum Direction {
     LEFT, RIGHT, UP, DOWN,
@@ -13,6 +16,7 @@ export class GamePresenter {
     private _rows: integer;
     private _cellSize: Vec2;
     private _fieldModel: GameFieldModel;
+    private _dataModel: GameDataModel;
     private _minOverlap: integer;
 
     private get randType(): integer {
@@ -42,6 +46,9 @@ export class GamePresenter {
             return;
         }
 
+        this._dataModel = new GameDataModel();
+        this._dataModel.createData();
+
         //draw cells
         const cells = this._fieldModel.getCells();
         for (const [id, cell] of cells) {
@@ -58,17 +65,20 @@ export class GamePresenter {
 
     private onClick(x: number, y: number): void {
         const cell = this.getCellByPos(x, y);
+        // console.log(`x:${x}, y${y}`);
         if (!cell || cell.cellType < 0) return;
 
         //Get Chain by Cell
         const cellsChain = new Map<integer, CellObject>();
         this.collectChain(cell, cellsChain);
+        console.log("CELL: ",cell.cellType, " CHAIN: ", cellsChain.size);
         if (cellsChain.size < this._minOverlap) return;
 
         //Delete Elements
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
             this._view.changeCell(id, c.cellType);
+            this._dataModel.score += 1;
         }
 
         //Falling Cells
@@ -76,10 +86,15 @@ export class GamePresenter {
 
         //Calculate Left Steps
         const cells = this._fieldModel.getCellsArray();
-        const leftSteps = this.getLeftSteps(cells);
-        if (leftSteps === 0) {
+        const allowSteps = this.getLeftSteps(cells);
+        const canMix = GameConsts.MAX_MIXES - this._dataModel.mixCount;
+        if (allowSteps === 0 && canMix) {
             this.mixField(this._fieldModel.getCellsArray());
+            this._dataModel.mixCount += 1;
         }
+
+        this._dataModel.step += 1;
+        this.checkGameState(allowSteps);
     }
 
     private mixField(cells: CellObject[]): void {
@@ -190,5 +205,24 @@ export class GamePresenter {
         }
 
         return count + this.getLeftSteps(cells);
+    }
+
+    private checkGameState(allowSteps1: integer): void {
+        const cells = this._fieldModel.getCellsArray();
+        const allowSteps = this.getLeftSteps(cells);
+        const leftSteps = GameConsts.MAX_STEPS - this._dataModel.step;
+        const isGameWin = this._dataModel.score >= GameConsts.GOAL_SCORE;
+        const isGameOver = allowSteps < 1 || leftSteps < 1;
+        console.log(`allow:${allowSteps}, left:${leftSteps}, isOver:${isGameOver}`);
+        
+        if (isGameWin) {
+            new SceneManager().changeScene(Scene.GAME_WIN);
+            return;
+        }
+
+        if (isGameOver) {
+            new SceneManager().changeScene(Scene.GAME_OVER);
+            return;
+        }
     }
 }

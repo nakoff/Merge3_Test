@@ -1,15 +1,17 @@
 import { ResourceManager } from '../core/resource-manager';
 import { DataManager } from '../core/data-manager';
+import { Scene, SceneManager } from '../core/scene-manager';
 
 export class StartScene extends Phaser.Scene {
 
     constructor() {
-        super("Start");
+        super(Scene.START);
     }
 
     preload(): void {
         new DataManager().init();
         new ResourceManager(this).init();
+        new SceneManager().init(this);
     }
 
     create(): void {
@@ -24,7 +26,7 @@ export class StartScene extends Phaser.Scene {
         clickText.setY(y + gameText.height);
 
         this.input.once("pointerdown", () => {
-            this.scene.start("Game");
+            new SceneManager().changeScene(Scene.GAME);
         })
     }
 

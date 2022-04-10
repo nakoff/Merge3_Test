@@ -1,15 +1,19 @@
 import { GamePresenter } from '../game-field/presenter';
 import { GameView } from '../game-field/viewer';
 import { GameConsts } from '../game-consts';
+import { Scene, SceneManager } from '../core/scene-manager';
 
 export class GameScene extends Phaser.Scene {
     private _gamePres: GamePresenter;
 
     constructor() {
-        super("Game");
+        super(Scene.GAME);
     }
 
     preload(): void {
+        new SceneManager().init(this);
+
+        //Game Field
         const gameView = new GameView(this);
         this._gamePres = new GamePresenter(gameView);
     }

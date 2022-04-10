@@ -3,9 +3,10 @@ import { IDataObject, ObjectType } from "./data-object";
 
 export class DataManager {
     static readonly _db = new Map<ObjectType, Array<IDataObject>>();
-    static _incId: integer = 0;
+    static _incId: integer;
 
     public init(): void {
+        DataManager._incId = 0;
         DataManager._db.clear();
     }
 

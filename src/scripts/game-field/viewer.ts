@@ -24,6 +24,7 @@ export class GameView implements IGameView {
     private _resManager: ResourceManager;
     private readonly _cells = new Map<integer, Cell>();
     private readonly _dirtyCells = new Map<integer, Cell>();
+    private readonly _deletedCells = new Map<integer, Phaser.GameObjects.Sprite>();
     private _fallSpeed = 5;
 
     public constructor(scene: Phaser.Scene) {
@@ -72,6 +73,14 @@ export class GameView implements IGameView {
             if (distX <= this._fallSpeed && distY <= this._fallSpeed)
                 this._dirtyCells.delete(id);
         }
+
+        for (const [id, el] of this._deletedCells) {
+            el.setScale(el.scaleX-0.2, el.scaleY-0.2);
+            if (el.scaleX < 0) {
+                el.destroy();
+                this._deletedCells.delete(id);
+            }
+        }
     }
 
     createCell(id: integer, pos: Vec2, type: integer): void {
@@ -85,7 +94,9 @@ export class GameView implements IGameView {
         if (!cell) return;
 
         if (cell.element) {
-            cell.element.destroy();
+            if (this._deletedCells.has(cell.id))
+                cell.element.destroy();
+            this._deletedCells.set(cell.id, cell.element);
             cell.element = undefined;
         }
 
