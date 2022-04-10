@@ -37,15 +37,14 @@ export class GamePresenter {
         this._cellSize = cellSize;
 
         this._fieldModel = new GameFieldModel();
+        this._dataModel = new GameDataModel();
+
         const offset = {x: 58, y: 148};
         const err = this._fieldModel.createField(this._cols, this._rows, cellSize, offset);
         if (err){
             console.error(err);
             return;
         }
-
-        this._dataModel = new GameDataModel();
-        this._dataModel.createData();
 
         //draw cells
         const cells = this._fieldModel.getCells();
@@ -186,10 +185,10 @@ export class GamePresenter {
 
         switch (dir) {
             case Direction.LEFT: 
-                if ((curId - this._cols * curCell.row) - dist >= 0) tId = curId - dist;
+                if ((curId - this._cols * curCell.row) - dist > 0) tId = curId - dist;
                 break;
             case Direction.RIGHT:
-                if ((curId - this._cols * curCell.row) + dist < this._cols) tId = curId + dist;
+                if ((curId - this._cols * curCell.row) + dist <= this._cols) tId = curId + dist;
                 break;
             case Direction.UP: 
                 tId = curId - (this._cols * dist); 
@@ -241,7 +240,7 @@ export class GamePresenter {
         const leftSteps = GameConsts.MAX_STEPS - this._dataModel.step;
         const isGameWin = this._dataModel.score >= GameConsts.GOAL_SCORE;
         const isGameOver = allowSteps < 1 || leftSteps < 1;
-        console.log(`allow:${allowSteps}, left:${leftSteps}, isOver:${isGameOver}`);
+        // console.log(`allow:${allowSteps}, left:${leftSteps}, isOver:${isGameOver}`);
         
         if (isGameWin) {
             new SceneManager().changeScene(Scene.GAME_WIN);

@@ -1,15 +1,14 @@
-import { IDataObject, ObjectType } from "./data-object";
-
+import { IDataObject, ObjectType } from './data-object';
 
 export class DataManager {
-    static readonly _db = new Map<ObjectType, Array<IDataObject>>();
-    static _incId: integer;
+    static _db: Map<ObjectType, Array<IDataObject>>;
+    static _incId: integer = 0;
 
-    public init(): void {
+    public init(storage: Map<ObjectType, Array<IDataObject>>): void  {
         DataManager._incId = 0;
-        DataManager._db.clear();
+        storage.clear();
+        DataManager._db = storage;
     }
-
 
     public addObject(dataObj: IDataObject): string | null {
         let error: string | null = null;
@@ -29,8 +28,10 @@ export class DataManager {
 
     public getObjects(type: ObjectType): Array<IDataObject> {
         let objs = DataManager._db.get(type);
-        if (!objs)
+        if (!objs) {
             objs = new Array<IDataObject>();
+            DataManager._db.set(type, objs);
+        }
         return objs;
     }
 
@@ -54,5 +55,13 @@ export class DataManager {
             err = `object type: ${type}, id: ${id} not found`;
 
         return {obj, err};
+    }
+
+    public dump(type: ObjectType): void{
+        const objs = DataManager._db.get(type);
+        console.log("===============");
+        if (objs)
+            console.log(objs[0]);
+        console.log("===============");
     }
 }

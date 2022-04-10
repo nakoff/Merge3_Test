@@ -1,17 +1,23 @@
 import { ResourceManager } from '../core/resource-manager';
 import { DataManager } from '../core/data-manager';
 import { Scene, SceneManager } from '../core/scene-manager';
+import { GameDataModel } from '../models/game-data';
+import { ObjectType, IDataObject } from '../core/data-object';
 
 export class StartScene extends Phaser.Scene {
+    private storage = new Map<ObjectType, IDataObject[]>()
 
     constructor() {
         super(Scene.START);
     }
 
     preload(): void {
-        new DataManager().init();
+        new DataManager().init(this.storage);
+        new GameDataModel().init();
+
         new ResourceManager(this).init();
         new SceneManager().init(this);
+        new DataManager().dump(ObjectType.GAME_DATA);
     }
 
     create(): void {

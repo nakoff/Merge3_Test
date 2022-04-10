@@ -13,10 +13,10 @@ export class GameDataModel {
 
     public constructor() {
         this._dataManager = new DataManager();
-        const obj = this._dataManager.getObjects(ObjectType.GAME_DATA).pop();
+        const obj = this._dataManager.getObjects(ObjectType.GAME_DATA)[0];
         if (obj) {
             this._do = <GameDataObject> obj;
-        }
+        } 
     }
 
     public subscribe(listener: (arg0: TypeEvent)=> void): void {
@@ -32,7 +32,7 @@ export class GameDataModel {
         this.updateEvent.trigger(id);
     }
 
-    public createData(): void {
+    public init(): void {
         this._do = new GameDataObject();
         this._dataManager.addObject(this._do);
     }
