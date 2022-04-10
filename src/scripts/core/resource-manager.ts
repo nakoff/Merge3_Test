@@ -10,7 +10,7 @@ export class ResourceManager {
     }
 
     public init(): void {
-        this._sc.load.spritesheet(Resource.ELEMENTS.toString(), "assets/elements.png", {frameWidth: 196/5, frameHeight: 44});
+        this._sc.load.spritesheet(Resource.ELEMENTS.toString(), "assets/elements.png", {frameWidth: 275/7, frameHeight: 44});
         this._sc.load.image(Resource.GAME_BG.toString(), "assets/bg.png");
     }
 

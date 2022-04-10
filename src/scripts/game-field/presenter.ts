@@ -17,7 +17,6 @@ export class GamePresenter {
     private _cellSize: Vec2;
     private _fieldModel: GameFieldModel;
     private _dataModel: GameDataModel;
-    private _minOverlap: integer;
 
     private get randType(): integer {
         // const elSize = Object.keys(ElementType).length / 2;
@@ -32,11 +31,10 @@ export class GamePresenter {
         this._view = view;
     }
 
-    public create(fieldSize: Vec2, cellSize: Vec2, minOverlap: integer): void {
+    public create(fieldSize: Vec2, cellSize: Vec2): void {
         this._cols = fieldSize.x;
         this._rows = fieldSize.y;
         this._cellSize = cellSize;
-        this._minOverlap = minOverlap;
 
         this._fieldModel = new GameFieldModel();
         const offset = {x: 58, y: 148};
@@ -68,17 +66,47 @@ export class GamePresenter {
         // console.log(`x:${x}, y${y}`);
         if (!cell || cell.cellType < 0) return;
 
-        //Get Chain by Cell
-        const cellsChain = new Map<integer, CellObject>();
-        this.collectChain(cell, cellsChain);
-        console.log("CELL: ",cell.cellType, " CHAIN: ", cellsChain.size);
-        if (cellsChain.size < this._minOverlap) return;
+        let cellsChain = new Map<integer, CellObject>();
+        let chainSize = 0;
+        let hasBonus = false;
+
+        switch (cell.cellType) {
+            case ElementType.BONUS1:
+                cellsChain = this._fieldModel.getCellsRow(cell.row);
+                hasBonus = true;
+                break;
+            case ElementType.BONUS2:
+                cellsChain = this._fieldModel.getCellsCol(cell.col);
+                hasBonus = true;
+                break;
+            default:
+                //Get Chain by Cell
+                this.collectChain(cell, cellsChain);
+                chainSize = cellsChain.size;
+                if (chainSize < GameConsts.MIN_CHAIN) 
+                    return;
+                break;
+        }
 
         //Delete Elements
         for (const [id, c] of cellsChain) {
             c.cellType = -1;
             this._view.changeCell(id, c.cellType);
             this._dataModel.score += 1;
+        }
+
+        //Check create Bonus
+        if (!hasBonus && chainSize >= GameConsts.REQ_CHAIN_BONUS1) {
+            cell.cellType = -1;
+            this._view.changeCell(cell.id, cell.cellType);
+            cell.cellType = ElementType.BONUS1;
+
+            if (chainSize >= GameConsts.REQ_CHAIN_BONUS2) {
+                cell.cellType = ElementType.BONUS2;
+            }
+
+            this._view.changeCell(cell.id, cell.cellType);
+            cellsChain.delete(cell.id);
         }
 
         //Falling Cells
@@ -196,7 +224,7 @@ export class GamePresenter {
 
         const chain = new Map<integer, CellObject>();
         this.collectChain(cell, chain);
-        if (chain.size >= this._minOverlap)
+        if (chain.size >= GameConsts.MIN_CHAIN)
             count++
 
         for (const [i, c] of chain) {

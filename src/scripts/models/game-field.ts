@@ -49,6 +49,28 @@ export class GameFieldModel {
         return arr;
     }
 
+    public getCellsRow(row: integer): Map<integer, CellObject> {
+        const map = new Map<integer, CellObject>();
+        const cells = this.getCells();
+        for (const [id, cell] of cells) {
+            if (cell.row === row)
+                map.set(id, cell);
+        }
+
+        return map;
+    }
+
+    public getCellsCol(col: integer): Map<integer, CellObject> {
+        const map = new Map<integer, CellObject>();
+        const cells = this.getCells();
+        for (const [id, cell] of cells) {
+            if (cell.col === col)
+                map.set(id, cell);
+        }
+
+        return map;
+    }
+
     public getCell(id: integer): CellObject | undefined {
         if (!this._cacheObjs)
             this.getCells();

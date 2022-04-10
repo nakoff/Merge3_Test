@@ -36,8 +36,7 @@ export class GameScene extends Phaser.Scene {
 
         this._gamePres.create(
             { x: cols, y: rows }, 
-            { x: cellWidth, y: cellHeight },
-            GameConsts.MIN_CHAIN
+            { x: cellWidth, y: cellHeight }
         );
 
         this._uiPres.create();
