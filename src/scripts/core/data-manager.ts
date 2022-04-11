@@ -1,13 +1,12 @@
 import { IDataObject, ObjectType } from './data-object';
 
 export class DataManager {
-    static _db: Map<ObjectType, Array<IDataObject>>;
+    static _db = new Map<ObjectType, Array<IDataObject>>();
     static _incId: integer = 0;
 
-    public init(storage: Map<ObjectType, Array<IDataObject>>): void  {
+    public init(): void  {
         DataManager._incId = 0;
-        storage.clear();
-        DataManager._db = storage;
+        DataManager._db.clear();
     }
 
     public addObject(dataObj: IDataObject): string | null {
